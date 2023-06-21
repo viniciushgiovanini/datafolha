@@ -4,6 +4,11 @@
 
 ## Run Backend
 
+1. Baixe o Yarn com a biblioteca NPM.  
+2. Crie o arquivo no diretorio do backend chamado ``.env`` e copie o conteudo do arquivo ``.end-main``
+3. Inicie com o cmd o hot-reload do tsc com o comando ``` tsc --w ```.  
+4. Inicie o servidor com hot-reload com outro terminal cmd com ```yarn server```.
+5. Utilize o **Postman** para realizar conexção atraves da url ```http://localhost:4000/```.
 
 ----
 

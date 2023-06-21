@@ -1,0 +1,4 @@
+PORT=4000
+PGDATABASE=datafolha
+USER=postgres
+password=123456
