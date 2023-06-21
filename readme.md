@@ -12,7 +12,9 @@
 
 ----
 
+## Run Frontend
 
+1. Rode o comando ```flutter packages get``` para baixar dependências do flutter.
 
 
 
