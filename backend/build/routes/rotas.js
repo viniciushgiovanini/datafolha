@@ -19,6 +19,7 @@ const getUser_1 = require("../func/auth/getUser");
 const pwdHashGenerator_1 = require("../func/pwdHashGenerator");
 const addVoto_1 = require("../func/query_votacao/addVoto");
 const getAllvotos_1 = require("../func/query_votacao/getAllvotos");
+const markVoto_1 = require("../func/query_votacao/markVoto");
 //Path das rotas
 routes.get("/", (req, res) => {
     res.status(200);
@@ -109,16 +110,29 @@ routes.post("/votar", (req, res) => __awaiter(void 0, void 0, void 0, function* 
     else {
         queryData.push(req.body.candidato);
     }
-    let pegarVoto = yield (0, addVoto_1.addVoto)(connection, queryData)
-        .then((res) => res)
+    let queryArray = [];
+    queryArray.push(req.body.user_email);
+    let takeUser = yield (0, getUser_1.requestUser)(connection, queryArray)
+        .then((resp) => resp)
         .catch((err) => err);
-    if (pegarVoto) {
-        // res.status(200);
-        res.send({ resp: "Voto realizado com sucesso !" });
-    }
-    else {
-        // res.status(404);
-        res.send({ resp: "Voto não computado !" });
+    if (takeUser != false) {
+        if (takeUser.votacao == false) {
+            let pegarVoto = yield (0, addVoto_1.addVoto)(connection, queryData)
+                .then((res) => res)
+                .catch((err) => err);
+            if (pegarVoto) {
+                // res.status(200);
+                res.send({ resp: "Voto realizado com sucesso !" });
+            }
+            else {
+                // res.status(404);
+                res.send({ resp: "Voto não computado !" });
+            }
+        }
+        else {
+            res.status(200);
+            res.send({ resp: "Usuário já votou !" });
+        }
     }
     setTimeout(() => {
         (0, connectbd_1.closeConnection)(connection);
@@ -138,6 +152,37 @@ routes.get("/allvotos", (req, res) => __awaiter(void 0, void 0, void 0, function
     else {
         res.status(200);
         res.send({ resp: respAllData });
+    }
+    setTimeout(() => {
+        (0, connectbd_1.closeConnection)(connection);
+    }, 10000);
+}));
+routes.put("/marcarVoto", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let connection = yield (0, connectbd_1.connectToPG)()
+        .then((res) => res)
+        .catch((err) => err);
+    let userEmail = req.body.user_email;
+    let queryData = [];
+    queryData.push(userEmail);
+    let requestUS = yield (0, getUser_1.requestUser)(connection, queryData)
+        .then((resp) => resp)
+        .catch((err) => err);
+    if (requestUS != false) {
+        let respRequestMark = yield (0, markVoto_1.markVoto)(connection, queryData)
+            .then((suc) => suc)
+            .catch((err) => err);
+        if (respRequestMark) {
+            res.status(200);
+            res.send({ resp: "Usuario marcado como votado !" });
+        }
+        else {
+            res.status(404);
+            res.send({ resp: "Erro na request para marcar voto" });
+        }
+    }
+    else {
+        res.status(404);
+        res.send({ resp: "Erro na request de user para marcar voto" });
     }
     setTimeout(() => {
         (0, connectbd_1.closeConnection)(connection);

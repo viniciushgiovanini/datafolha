@@ -9,6 +9,7 @@ import { requestUser } from "../func/auth/getUser";
 import { hashPWD, compareHash } from "../func/pwdHashGenerator";
 import { addVoto } from "../func/query_votacao/addVoto";
 import { getAllvotos } from "../func/query_votacao/getAllvotos";
+import { markVoto } from "../func/query_votacao/markVoto";
 
 //Path das rotas
 routes.get("/", (req: any, res: any) => {
@@ -119,18 +120,31 @@ routes.post("/votar", async (req: any, res: any): Promise<any> => {
     queryData.push(req.body.candidato);
   }
 
-  let pegarVoto = await addVoto(connection, queryData)
-    .then((res: any) => res)
-    .catch((err: any) => err);
+  let queryArray: string[] = [];
+  queryArray.push(req.body.user_email);
 
-  if (pegarVoto) {
-    // res.status(200);
-    res.send({ resp: "Voto realizado com sucesso !" });
-  } else {
-    // res.status(404);
-    res.send({ resp: "Voto não computado !" });
+  let takeUser: any = await requestUser(connection, queryArray)
+    .then((resp: object) => resp)
+    .catch((err: boolean) => err);
+
+  if (takeUser != false) {
+    if (takeUser.votacao == false) {
+      let pegarVoto = await addVoto(connection, queryData)
+        .then((res: any) => res)
+        .catch((err: any) => err);
+
+      if (pegarVoto) {
+        // res.status(200);
+        res.send({ resp: "Voto realizado com sucesso !" });
+      } else {
+        // res.status(404);
+        res.send({ resp: "Voto não computado !" });
+      }
+    } else {
+      res.status(200);
+      res.send({ resp: "Usuário já votou !" });
+    }
   }
-
   setTimeout(() => {
     closeConnection(connection);
   }, 10000);
@@ -156,5 +170,42 @@ routes.get("/allvotos", async (req: any, res: any): Promise<any> => {
     closeConnection(connection);
   }, 10000);
 });
+
+routes.put("/marcarVoto", async (req: any, res: any): Promise<any> => {
+  let connection: any = await connectToPG()
+    .then((res: any) => res)
+    .catch((err: any) => err);
+
+  let userEmail = req.body.user_email;
+
+  let queryData: string[] = [];
+  queryData.push(userEmail);
+
+  let requestUS: any = await requestUser(connection, queryData)
+    .then((resp: object) => resp)
+    .catch((err: boolean) => err);
+
+  if (requestUS != false) {
+    let respRequestMark = await markVoto(connection, queryData)
+      .then((suc: boolean) => suc)
+      .catch((err: boolean) => err);
+
+    if (respRequestMark) {
+      res.status(200);
+      res.send({ resp: "Usuario marcado como votado !" });
+    } else {
+      res.status(404);
+      res.send({ resp: "Erro na request para marcar voto" });
+    }
+  } else {
+    res.status(404);
+    res.send({ resp: "Erro na request de user para marcar voto" });
+  }
+
+  setTimeout(() => {
+    closeConnection(connection);
+  }, 10000);
+});
+
 //export solo
 module.exports = routes;
