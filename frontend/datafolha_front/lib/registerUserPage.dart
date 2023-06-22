@@ -1,7 +1,9 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -35,7 +37,10 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Cadastrar novo usuário'), centerTitle: true,),
+      appBar: AppBar(
+        title: const Text('Cadastrar novo usuário'),
+        centerTitle: true,
+      ),
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(20.0),
@@ -82,7 +87,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 decoration: const InputDecoration(
                   labelText: 'Sexo',
                 ),
-                items: ['Feminino', 'Masculino', 'Outros'].map((String value) {
+                items: ['Feminino', 'Masculino', 'Outro'].map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -122,12 +127,31 @@ class _RegisterPageState extends State<RegisterPage> {
                       ? DateFormat('dd/MM/yyyy').format(selectedDate!)
                       : null;
 
-                  print('Nome: $name');
-                  print('E-mail: $email');
-                  print('Senha: $password');
-                  print('CPF: $cpf');
-                  print('Sexo: $gender');
-                  print('Data de Nascimento: $birthdate');
+                  List<String> colors = [name, email, password, cpf, gender];
+
+                  String jsonOficial =
+                      '{"nome": "$name","email":"$email","password":"$password","sexo":"$gender","cpf":"$cpf", "age": "12"}';
+
+                  //Use jsonEncode method
+                  // String jsonColors = jsonEncode(colors);
+                  // print(jsonColors);
+                  Map json = {
+                    'nome': name,
+                    'password': password,
+                    'email': email,
+                    'sexo': gender,
+                    'cpf': cpf,
+                    'age': birthdate
+                  };
+                  // print(json);
+                  postUser(json);
+
+                  // print('Nome: $name');
+                  // print('E-mail: $email');
+                  // print('Senha: $password');
+                  // print('CPF: $cpf');
+                  // print('Sexo: $gender');
+                  // print('Data de Nascimento: $birthdate');
                 },
                 child: const Text('Cadastrar'),
               ),
@@ -136,5 +160,17 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       ),
     );
+  }
+
+  void postUser(Map json) async {
+    var uri = Uri.parse("http://localhost:4000/addUser");
+
+    http.Response resposta;
+
+    resposta = await http.post(uri,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(json));
   }
 }

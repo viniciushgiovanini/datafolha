@@ -14,7 +14,7 @@ import { markVoto } from "../func/query_votacao/markVoto";
 //Path das rotas
 routes.get("/", (req: any, res: any) => {
   res.status(200);
-  res.send("Raiz da API do DataFolha");
+  res.send({ resp: "Raiz da API do DataFolha" });
 });
 
 routes.get("/testCN", async (req: any, res: any): Promise<void> => {
@@ -34,8 +34,12 @@ routes.post("/addUser", async (req: any, res: any): Promise<any> => {
     .then((res: any) => res)
     .catch((err: any) => err);
 
-  let hashpassword: string = await hashPWD(req.body.password);
+  if (req.body.password == "") {
+    res.send({ resp: "Senha invádia" });
+    return;
+  }
 
+  let hashpassword: string = await hashPWD(req.body.password);
   let queryArray: string[] = [];
   queryArray.push(req.body.nome);
   queryArray.push(req.body.email);
@@ -68,7 +72,7 @@ routes.get("/login", async (req: any, res: any): Promise<any> => {
 
   let queryArray: string[] = [];
 
-  queryArray.push(req.body.email);
+  queryArray.push(req.query.email);
 
   let retResp: any = await requestUser(connection, queryArray)
     .then((resp: any) => resp)
@@ -77,7 +81,7 @@ routes.get("/login", async (req: any, res: any): Promise<any> => {
   if (retResp != false) {
     let boolCompareHash: boolean = await compareHash(
       retResp.user_password,
-      req.body.password
+      req.query.password
     );
 
     if (boolCompareHash) {

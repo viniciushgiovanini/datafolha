@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'registerUserPage.dart';
 import 'votePage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
@@ -13,7 +15,10 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('DataFolha'), centerTitle: true,),
+      appBar: AppBar(
+        title: const Text('DataFolha'),
+        centerTitle: true,
+      ),
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(20.0),
@@ -46,11 +51,12 @@ class LoginPage extends StatelessWidget {
                 onPressed: () {
                   String email = emailController.text;
                   String password = passwordController.text;
-
+                  getUser(email, password);
                   print('E-mail: $email');
                   print('Senha: $password');
-                  Navigator.push(context, 
-                  MaterialPageRoute(builder: (context) => const VotePage()),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const VotePage()),
                   );
                 },
                 child: const Text('Entrar'),
@@ -60,7 +66,8 @@ class LoginPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const RegisterPage()),
+                    MaterialPageRoute(
+                        builder: (context) => const RegisterPage()),
                   );
                 },
                 child: const Text('Novo Usuário? Cadastre-se'),
@@ -71,4 +78,17 @@ class LoginPage extends StatelessWidget {
       ),
     );
   }
+}
+
+void getUser(String email, String senha) async {
+  var uri =
+      Uri.parse("http://localhost:4000/login?password=$senha&email=$email");
+
+  http.Response resposta;
+
+  resposta = await http.get(uri, headers: <String, String>{
+    'Content-Type': 'application/json; charset=UTF-8',
+  });
+
+  print(resposta.body);
 }

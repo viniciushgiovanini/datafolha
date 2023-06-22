@@ -23,7 +23,7 @@ const markVoto_1 = require("../func/query_votacao/markVoto");
 //Path das rotas
 routes.get("/", (req, res) => {
     res.status(200);
-    res.send("Raiz da API do DataFolha");
+    res.send({ resp: "Raiz da API do DataFolha" });
 });
 routes.get("/testCN", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let connection = yield (0, connectbd_1.connectToPG)()
@@ -38,6 +38,10 @@ routes.post("/addUser", (req, res) => __awaiter(void 0, void 0, void 0, function
     let connection = yield (0, connectbd_1.connectToPG)()
         .then((res) => res)
         .catch((err) => err);
+    if (req.body.password == "") {
+        res.send({ resp: "Senha invádia" });
+        return;
+    }
     let hashpassword = yield (0, pwdHashGenerator_1.hashPWD)(req.body.password);
     let queryArray = [];
     queryArray.push(req.body.nome);
@@ -66,12 +70,12 @@ routes.get("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* (
         .then((res) => res)
         .catch((err) => err);
     let queryArray = [];
-    queryArray.push(req.body.email);
+    queryArray.push(req.query.email);
     let retResp = yield (0, getUser_1.requestUser)(connection, queryArray)
         .then((resp) => resp)
         .catch((err) => err);
     if (retResp != false) {
-        let boolCompareHash = yield (0, pwdHashGenerator_1.compareHash)(retResp.user_password, req.body.password);
+        let boolCompareHash = yield (0, pwdHashGenerator_1.compareHash)(retResp.user_password, req.query.password);
         if (boolCompareHash) {
             const newResp = {
                 user_name: retResp.user_name,
