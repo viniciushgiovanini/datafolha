@@ -7,9 +7,12 @@ import { connectToPG, closeConnection } from "../func/connectbd";
 import { adicionarUser } from "../func/auth/addUser";
 import { requestUser } from "../func/auth/getUser";
 import { hashPWD, compareHash } from "../func/pwdHashGenerator";
+import { addVoto } from "../func/query_votacao/addVoto";
+import { getAllvotos } from "../func/query_votacao/getAllvotos";
 
 //Path das rotas
 routes.get("/", (req: any, res: any) => {
+  res.status(200);
   res.send("Raiz da API do DataFolha");
 });
 
@@ -45,8 +48,10 @@ routes.post("/addUser", async (req: any, res: any): Promise<any> => {
     .catch((err: any) => err);
 
   if (respostaPostUser) {
+    res.status(200);
     res.send("Usuário adicionado com sucesso !");
   } else {
+    res.status(404);
     res.send("ERRO ao adicionar usuário !");
   }
 
@@ -60,7 +65,6 @@ routes.get("/login", async (req: any, res: any): Promise<any> => {
     .then((res: any) => res)
     .catch((err: any) => err);
 
-  let hashpassword = await hashPWD(req.body.password);
   let queryArray: string[] = [];
 
   queryArray.push(req.body.email);
@@ -84,14 +88,70 @@ routes.get("/login", async (req: any, res: any): Promise<any> => {
         user_age: retResp.user_age,
       };
 
+      res.status(200);
       res.send({ resp: newResp });
     } else {
-      res.send({ resp: "Usuário não encontrado !" });
+      res.status(404);
+      res.send({ resp: "Senha incorreta !" });
     }
   } else {
-    res.send({ resp: "Usuário não encontrado !" });
+    res.status(404);
+    res.send({ resp: "Email não existente !" });
   }
 
+  setTimeout(() => {
+    closeConnection(connection);
+  }, 10000);
+});
+
+routes.post("/votar", async (req: any, res: any): Promise<any> => {
+  let connection: any = await connectToPG()
+    .then((res: any) => res)
+    .catch((err: any) => err);
+
+  let queryData: string[] = [];
+
+  if (req.body.candidato.toLowerCase() == "lula") {
+    queryData.push("luiz inacio lula da silva");
+  } else if (req.body.candidato.toLowerCase() == "bolsonaro") {
+    queryData.push("jair messias bolsonaro");
+  } else {
+    queryData.push(req.body.candidato);
+  }
+
+  let pegarVoto = await addVoto(connection, queryData)
+    .then((res: any) => res)
+    .catch((err: any) => err);
+
+  if (pegarVoto) {
+    // res.status(200);
+    res.send({ resp: "Voto realizado com sucesso !" });
+  } else {
+    // res.status(404);
+    res.send({ resp: "Voto não computado !" });
+  }
+
+  setTimeout(() => {
+    closeConnection(connection);
+  }, 10000);
+});
+
+routes.get("/allvotos", async (req: any, res: any): Promise<any> => {
+  let connection: any = await connectToPG()
+    .then((res: any) => res)
+    .catch((err: any) => err);
+
+  let respAllData: any = await getAllvotos(connection)
+    .then((resp: object) => resp)
+    .catch((err: boolean) => err);
+
+  if (respAllData == false) {
+    res.status(404);
+    res.send({ resp: "Erro na requisição !" });
+  } else {
+    res.status(200);
+    res.send({ resp: respAllData });
+  }
   setTimeout(() => {
     closeConnection(connection);
   }, 10000);
