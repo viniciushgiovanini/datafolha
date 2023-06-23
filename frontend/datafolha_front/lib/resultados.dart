@@ -409,7 +409,7 @@ class HomePageState extends State<HomePage> {
     );
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Pie Chart @apgapg"),
+        title: const Text("Votação Presidencial"),
         actions: [
           ElevatedButton(
             onPressed: () {
@@ -417,7 +417,7 @@ class HomePageState extends State<HomePage> {
                 key = key + 1;
               });
             },
-            child: Text("Reload".toUpperCase()),
+            child: Text("Recarregar".toUpperCase()),
           ),
         ],
       ),

@@ -11,7 +11,26 @@ import { addVoto } from "../func/query_votacao/addVoto";
 import { getAllvotos } from "../func/query_votacao/getAllvotos";
 import { markVoto } from "../func/query_votacao/markVoto";
 
-const validate = (): any => {};
+const validate = (dataV: string): number => {
+  let d1: any = new Date();
+  let dia: string = d1.getDate().toString().padStart(2, "0");
+  let mes: string = (d1.getMonth() + 1).toString().padStart(2, "0");
+  let ano: string = d1.getFullYear();
+
+  let data: string = `${ano}/${mes}/${dia}`;
+  d1 = new Date(data);
+
+  let dataSplit: any = dataV.split("/");
+
+  let dataInvert = `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}`;
+
+  let d2: any = new Date(dataInvert);
+  console.log(d2);
+  let diff: any = Math.abs(d2 - d1);
+  diff = Math.floor(diff / 31536000000);
+
+  return diff;
+};
 
 //Path das rotas
 routes.get("/", (req: any, res: any) => {
@@ -51,7 +70,7 @@ routes.post("/addUser", async (req: any, res: any): Promise<any> => {
   queryArray.push(req.body.cpf);
   queryArray.push(req.body.sexo);
 
-  if (req.body.age < 16) {
+  if (validate(req.body.age) < 16) {
     res.status(404);
     res.send({ resp: "Usuário não adicionado, menor de idade !" });
     return;
