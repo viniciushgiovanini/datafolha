@@ -35,7 +35,8 @@ routes.post("/addUser", async (req: any, res: any): Promise<any> => {
     .catch((err: any) => err);
 
   if (req.body.password == "") {
-    res.send({ resp: "Senha invádia" });
+    res.status(404);
+    res.send({ resp: "Senha inválida" });
     return;
   }
 
@@ -48,16 +49,21 @@ routes.post("/addUser", async (req: any, res: any): Promise<any> => {
   queryArray.push(req.body.cpf);
   queryArray.push(req.body.sexo);
 
+  if (req.body.age < 16) {
+    res.status(404);
+    res.send({ resp: "Usuário não adicionado, menor de idade !" });
+  }
+
   let respostaPostUser: boolean = await adicionarUser(connection, queryArray)
     .then((res: any) => res)
     .catch((err: any) => err);
 
   if (respostaPostUser) {
     res.status(200);
-    res.send("Usuário adicionado com sucesso !");
+    res.send({ resp: "Usuário adicionado com sucesso !" });
   } else {
     res.status(404);
-    res.send("ERRO ao adicionar usuário !");
+    res.send({ resp: "ERRO ao adicionar usuário !" });
   }
 
   setTimeout(() => {

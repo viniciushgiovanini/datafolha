@@ -34,6 +34,31 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  bool visibilidade = false;
+  String msmErro = "";
+  var color;
+  void changeV(String msg) {
+    if (msg != 'Usuário adicionado com sucesso !') {
+      setState(() {
+        visibilidade = true;
+        msmErro = msg;
+        color = Colors.red[600];
+      });
+    } else {
+      setState(() {
+        visibilidade = true;
+        msmErro = msg;
+        color = Colors.green[600];
+      });
+    }
+
+    Future.delayed(const Duration(seconds: 3), () {
+      setState(() {
+        visibilidade = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,7 +69,7 @@ class _RegisterPageState extends State<RegisterPage> {
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(20.0),
-          width: 300.0, // Largura da caixa de formulário
+          width: 500.0, // Largura da caixa de formulário
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -117,7 +142,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 20.0),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   String name = nameController.text;
                   String email = emailController.text;
                   String password = passwordController.text;
@@ -126,11 +151,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   String? birthdate = selectedDate != null
                       ? DateFormat('dd/MM/yyyy').format(selectedDate!)
                       : null;
-
-                  List<String> colors = [name, email, password, cpf, gender];
-
-                  String jsonOficial =
-                      '{"nome": "$name","email":"$email","password":"$password","sexo":"$gender","cpf":"$cpf", "age": "12"}';
 
                   //Use jsonEncode method
                   // String jsonColors = jsonEncode(colors);
@@ -144,8 +164,14 @@ class _RegisterPageState extends State<RegisterPage> {
                     'age': birthdate
                   };
                   // print(json);
-                  postUser(json);
-
+                  var resp = await postUser(json);
+                  var respJson = jsonDecode(resp);
+                  (respJson["resp"] == 'ERRO ao adicionar usuário !' ||
+                          respJson["resp"] ==
+                              'Usuário não adicionado, menor de idade !' ||
+                          respJson["Name"] == 'Senha inválida'
+                      ? changeV(respJson["resp"])
+                      : changeV(respJson["resp"]));
                   // print('Nome: $name');
                   // print('E-mail: $email');
                   // print('Senha: $password');
@@ -155,6 +181,24 @@ class _RegisterPageState extends State<RegisterPage> {
                 },
                 child: const Text('Cadastrar'),
               ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                child: Visibility(
+                    visible: visibilidade,
+                    child: Container(
+                        width: 500,
+                        height: 80,
+                        color: color,
+                        alignment: Alignment.center,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                          child: Text(msmErro,
+                              style: new TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                              )),
+                        ))),
+              )
             ],
           ),
         ),
@@ -162,7 +206,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  void postUser(Map json) async {
+  Future<String> postUser(Map json) async {
     var uri = Uri.parse("http://localhost:4000/addUser");
 
     http.Response resposta;
@@ -172,5 +216,6 @@ class _RegisterPageState extends State<RegisterPage> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(json));
+    return resposta.body;
   }
 }

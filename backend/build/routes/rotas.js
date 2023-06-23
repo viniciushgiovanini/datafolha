@@ -39,7 +39,8 @@ routes.post("/addUser", (req, res) => __awaiter(void 0, void 0, void 0, function
         .then((res) => res)
         .catch((err) => err);
     if (req.body.password == "") {
-        res.send({ resp: "Senha invádia" });
+        res.status(404);
+        res.send({ resp: "Senha inválida" });
         return;
     }
     let hashpassword = yield (0, pwdHashGenerator_1.hashPWD)(req.body.password);
@@ -50,16 +51,20 @@ routes.post("/addUser", (req, res) => __awaiter(void 0, void 0, void 0, function
     queryArray.push(req.body.age);
     queryArray.push(req.body.cpf);
     queryArray.push(req.body.sexo);
+    if (req.body.age < 16) {
+        res.status(404);
+        res.send({ resp: "Usuário não adicionado, menor de idade !" });
+    }
     let respostaPostUser = yield (0, addUser_1.adicionarUser)(connection, queryArray)
         .then((res) => res)
         .catch((err) => err);
     if (respostaPostUser) {
         res.status(200);
-        res.send("Usuário adicionado com sucesso !");
+        res.send({ resp: "Usuário adicionado com sucesso !" });
     }
     else {
         res.status(404);
-        res.send("ERRO ao adicionar usuário !");
+        res.send({ resp: "ERRO ao adicionar usuário !" });
     }
     setTimeout(() => {
         (0, connectbd_1.closeConnection)(connection);
