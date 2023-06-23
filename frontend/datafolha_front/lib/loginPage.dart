@@ -48,16 +48,21 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 20.0),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   String email = emailController.text;
                   String password = passwordController.text;
-                  getUser(email, password);
-                  print('E-mail: $email');
-                  print('Senha: $password');
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const VotePage()),
-                  );
+                  var retorno = await getUser(email, password);
+                  ((retorno == '{"resp":"Email não existente !"}') ||
+                          retorno == '{"resp":"Senha incorreta !"}')
+                      ? (print("texto"))
+                      : Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const VotePage()),
+                        );
+
+                  // print('E-mail: $email');
+                  // print('Senha: $password');
                 },
                 child: const Text('Entrar'),
               ),
@@ -72,6 +77,17 @@ class LoginPage extends StatelessWidget {
                 },
                 child: const Text('Novo Usuário? Cadastre-se'),
               ),
+              Visibility(
+                  visible: true,
+                  child: Container(
+                    color: Colors.blue[600],
+                    alignment: Alignment.center,
+                    child: Text('Hello World',
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium!
+                            .copyWith(color: Colors.white)),
+                  ))
             ],
           ),
         ),
@@ -80,7 +96,7 @@ class LoginPage extends StatelessWidget {
   }
 }
 
-void getUser(String email, String senha) async {
+Future<String> getUser(String email, String senha) async {
   var uri =
       Uri.parse("http://localhost:4000/login?password=$senha&email=$email");
 
@@ -89,6 +105,33 @@ void getUser(String email, String senha) async {
   resposta = await http.get(uri, headers: <String, String>{
     'Content-Type': 'application/json; charset=UTF-8',
   });
+  return resposta.body;
+}
 
-  print(resposta.body);
+Widget ativarTxtErro(BuildContext context, Text txt) {
+  return Visibility(
+      visible: true,
+      child: Container(
+        color: Colors.blue[600],
+        alignment: Alignment.center,
+        child: Text('Hello World',
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium!
+                .copyWith(color: Colors.white)),
+      ));
+}
+
+Widget desativarTxtErro(BuildContext context, Text txt) {
+  return Visibility(
+      visible: false,
+      child: Container(
+        color: Colors.blue[600],
+        alignment: Alignment.center,
+        child: Text('Hello World',
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium!
+                .copyWith(color: Colors.white)),
+      ));
 }
