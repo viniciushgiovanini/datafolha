@@ -20,6 +20,7 @@ const pwdHashGenerator_1 = require("../func/pwdHashGenerator");
 const addVoto_1 = require("../func/query_votacao/addVoto");
 const getAllvotos_1 = require("../func/query_votacao/getAllvotos");
 const markVoto_1 = require("../func/query_votacao/markVoto");
+const validate = () => { };
 //Path das rotas
 routes.get("/", (req, res) => {
     res.status(200);

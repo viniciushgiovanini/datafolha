@@ -11,6 +11,8 @@ import { addVoto } from "../func/query_votacao/addVoto";
 import { getAllvotos } from "../func/query_votacao/getAllvotos";
 import { markVoto } from "../func/query_votacao/markVoto";
 
+const validate = (): any => {};
+
 //Path das rotas
 routes.get("/", (req: any, res: any) => {
   res.status(200);
