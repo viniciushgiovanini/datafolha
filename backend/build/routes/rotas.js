@@ -54,6 +54,7 @@ routes.post("/addUser", (req, res) => __awaiter(void 0, void 0, void 0, function
     if (req.body.age < 16) {
         res.status(404);
         res.send({ resp: "Usuário não adicionado, menor de idade !" });
+        return;
     }
     let respostaPostUser = yield (0, addUser_1.adicionarUser)(connection, queryArray)
         .then((res) => res)

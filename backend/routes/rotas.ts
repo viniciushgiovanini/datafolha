@@ -52,6 +52,7 @@ routes.post("/addUser", async (req: any, res: any): Promise<any> => {
   if (req.body.age < 16) {
     res.status(404);
     res.send({ resp: "Usuário não adicionado, menor de idade !" });
+    return;
   }
 
   let respostaPostUser: boolean = await adicionarUser(connection, queryArray)
