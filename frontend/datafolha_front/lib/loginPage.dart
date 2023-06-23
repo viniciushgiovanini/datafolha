@@ -6,12 +6,31 @@ import 'votePage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  void changeV(String msg) {
+    setState(() {
+      visibilidade = true;
+      msmErro = msg;
+    });
+
+    Future.delayed(const Duration(seconds: 3), () {
+      setState(() {
+        visibilidade = false;
+      });
+    });
+  }
+
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
-  LoginPage({super.key});
-
+  bool visibilidade = false;
+  String msmErro = "";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,9 +71,10 @@ class LoginPage extends StatelessWidget {
                   String email = emailController.text;
                   String password = passwordController.text;
                   var retorno = await getUser(email, password);
+                  var retorno2 = jsonDecode(retorno);
                   ((retorno == '{"resp":"Email não existente !"}') ||
                           retorno == '{"resp":"Senha incorreta !"}')
-                      ? (print("texto"))
+                      ? (changeV(retorno2["resp"]))
                       : Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -78,15 +98,17 @@ class LoginPage extends StatelessWidget {
                 child: const Text('Novo Usuário? Cadastre-se'),
               ),
               Visibility(
-                  visible: true,
+                  visible: visibilidade,
                   child: Container(
-                    color: Colors.blue[600],
+                    width: 400,
+                    height: 35,
+                    color: Colors.red[600],
                     alignment: Alignment.center,
-                    child: Text('Hello World',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium!
-                            .copyWith(color: Colors.white)),
+                    child: Text(msmErro,
+                        style: new TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                        )),
                   ))
             ],
           ),
@@ -106,32 +128,4 @@ Future<String> getUser(String email, String senha) async {
     'Content-Type': 'application/json; charset=UTF-8',
   });
   return resposta.body;
-}
-
-Widget ativarTxtErro(BuildContext context, Text txt) {
-  return Visibility(
-      visible: true,
-      child: Container(
-        color: Colors.blue[600],
-        alignment: Alignment.center,
-        child: Text('Hello World',
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium!
-                .copyWith(color: Colors.white)),
-      ));
-}
-
-Widget desativarTxtErro(BuildContext context, Text txt) {
-  return Visibility(
-      visible: false,
-      child: Container(
-        color: Colors.blue[600],
-        alignment: Alignment.center,
-        child: Text('Hello World',
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium!
-                .copyWith(color: Colors.white)),
-      ));
 }
