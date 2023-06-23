@@ -25,7 +25,6 @@ const validate = (dataV: string): number => {
   let dataInvert = `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}`;
 
   let d2: any = new Date(dataInvert);
-  console.log(d2);
   let diff: any = Math.abs(d2 - d1);
   diff = Math.floor(diff / 31536000000);
 
