@@ -152,7 +152,7 @@ routes.post("/votar", async (req: any, res: any): Promise<any> => {
         res.send({ resp: "Voto não computado !" });
       }
     } else {
-      res.status(200);
+      res.status(404);
       res.send({ resp: "Usuário já votou !" });
     }
   }

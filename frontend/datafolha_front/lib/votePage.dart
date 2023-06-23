@@ -1,14 +1,22 @@
 // ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
+import 'resultados.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class VotePage extends StatelessWidget {
-  const VotePage({super.key});
+  const VotePage({super.key, required this.text});
+
+  final text;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('DataFolha'), centerTitle: true,),
+      appBar: AppBar(
+        title: const Text('DataFolha'),
+        centerTitle: true,
+      ),
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(20.0),
@@ -17,7 +25,7 @@ class VotePage extends StatelessWidget {
             children: [
               EscolherPresidente(
                 title: 'Jair Messias Bolsonaro',
-                description: 'abcd',
+                description: 'Partido Liberal (PL) 22',
                 image: 'images/Bolsonaro.jpg',
                 onPressed: () {
                   showDialog(
@@ -25,11 +33,32 @@ class VotePage extends StatelessWidget {
                     builder: (BuildContext context) {
                       return AlertDialog(
                         title: const Text('Confirmação'),
-                        content: const Text('Deseja votar em Jair Messias Bolsonaro?'),
+                        content: const Text(
+                            'Deseja votar em Jair Messias Bolsonaro?'),
                         actions: [
                           TextButton(
-                            onPressed: () {
+                            onPressed: () async {
+                              Map json = {
+                                "candidato": "jair messias bolsonaro",
+                                "user_email": text["user_email"]
+                              };
+
+                              Map json2 = {"user_email": text["user_email"]};
+
+                              var resp = await addVoto(json);
+                              var retorno2 = jsonDecode(resp);
+                              (retorno2["resp"] ==
+                                      'Voto realizado com sucesso !'
+                                  ? markVoto(json2)
+                                  : "");
                               Navigator.of(context).pop();
+                              (retorno2["resp"] ==
+                                      'Voto realizado com sucesso !'
+                                  ? Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Resultados()))
+                                  : "");
                               // BD
                             },
                             child: const Text('Votar'),
@@ -48,7 +77,7 @@ class VotePage extends StatelessWidget {
               ),
               EscolherPresidente(
                 title: 'Luiz Inácio Lula da Silva',
-                description: 'abcd',
+                description: 'Partido dos Trabalhadores (PT) 13',
                 image: 'images/Lula.jpg',
                 onPressed: () {
                   showDialog(
@@ -56,12 +85,34 @@ class VotePage extends StatelessWidget {
                     builder: (BuildContext context) {
                       return AlertDialog(
                         title: const Text('Confirmação'),
-                        content: const Text('Deseja votar em Luiz Inácio Lula da Silva?'),
+                        content: const Text(
+                            'Deseja votar em Luiz Inácio Lula da Silva?'),
                         actions: [
                           TextButton(
-                            onPressed: () {
+                            onPressed: () async {
+                              Map json = {
+                                "candidato": "luiz inacio lula da silva",
+                                "user_email": text["user_email"]
+                              };
+                              Map json2 = {"user_email": text["user_email"]};
+                              var resp = await addVoto(json);
+                              var retorno2 = jsonDecode(resp);
+
+                              (retorno2["resp"] ==
+                                      'Voto realizado com sucesso !'
+                                  ? markVoto(json2)
+                                  : "");
                               Navigator.of(context).pop();
+                              (retorno2["resp"] ==
+                                      'Voto realizado com sucesso !'
+                                  ? Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Resultados()))
+                                  : "");
+
                               // BD
+                              // print(jsonColors);
                             },
                             child: const Text('Votar'),
                           ),
@@ -91,8 +142,8 @@ class EscolherPresidente extends StatelessWidget {
   final String image;
   final VoidCallback onPressed;
 
-  const EscolherPresidente(
-    {super.key, 
+  const EscolherPresidente({
+    super.key,
     required this.title,
     required this.description,
     required this.image,
@@ -130,4 +181,30 @@ class EscolherPresidente extends StatelessWidget {
       ],
     );
   }
+}
+
+Future<String> addVoto(Map json) async {
+  var uri = Uri.parse("http://localhost:4000/votar");
+
+  http.Response resposta;
+
+  resposta = await http.post(uri,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(json));
+
+  return resposta.body;
+}
+
+void markVoto(Map json) async {
+  var uri = Uri.parse("http://localhost:4000/marcarVoto");
+
+  http.Response resposta;
+
+  resposta = await http.put(uri,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(json));
 }

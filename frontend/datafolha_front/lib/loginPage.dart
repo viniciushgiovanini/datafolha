@@ -78,7 +78,8 @@ class _LoginPageState extends State<LoginPage> {
                       : Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const VotePage()),
+                              builder: (context) =>
+                                  VotePage(text: retorno2["resp"])),
                         );
 
                   // print('E-mail: $email');

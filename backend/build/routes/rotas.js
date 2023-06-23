@@ -140,7 +140,7 @@ routes.post("/votar", (req, res) => __awaiter(void 0, void 0, void 0, function* 
             }
         }
         else {
-            res.status(200);
+            res.status(404);
             res.send({ resp: "Usuário já votou !" });
         }
     }
